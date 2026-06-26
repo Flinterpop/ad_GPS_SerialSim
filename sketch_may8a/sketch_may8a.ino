@@ -5,6 +5,12 @@
 char RMC[100];
 char GGA[100];
 
+char ZDA[100];
+char GLL[100];
+char VTG[100];
+
+
+
 float latitudeInDegs = 45.255456;
 float longitudeInDegs = 64.5000;
 float speedInKnots = 150.1;
@@ -123,6 +129,42 @@ void makeGGA()
   strcat(GGA,buf2);
 }
 
+void makeGLL()
+{
+
+}
+void makeVTG()
+{
+
+}
+
+void makeZDA()
+{
+  //makeLatLngStrings();
+
+  float altMSL = 99.1;
+  char altMSLStr[10]; // Buffer to hold the converted float
+  sprintf(altMSLStr, "%2d.%01d", (int)altMSL, (int)(altMSL * 10) % 10);
+
+  float undulation = 2.5;
+  char undulStr[10]; // Buffer to hold the converted float
+  sprintf(undulStr, "%1d.%01d", (int)undulation, (int)(undulation * 10) % 10);
+
+  time_t t = now(); 
+  int hh = hour(t)+1;
+  int mm = minute(t)+1;
+  int ss = second(t);
+
+  int _year = year(t)-2000;
+  int _month = month(t);
+  int _day = day(t);
+  sprintf(ZDA, "$GPZDA,%02d%02d%02d,%d,%d,%d,,,*", hh,mm,ss,_day,_month,_year);
+
+  int checksum = nmea_get_checksum(ZDA);
+  char buf2[10];
+  sprintf(buf2,"%2X\r\n",checksum);
+  strcat(ZDA,buf2);
+}
 
 
 void setup()    // put your setup code here, to run once:
@@ -131,7 +173,7 @@ void setup()    // put your setup code here, to run once:
   setTime(20,43,0,9,5,26); //hr, min, sec, day, month, year
 
   pinMode(LED_BUILTIN, OUTPUT); // Initiatimetype:AllTopic:Communicationlize LED pintimetype:AllTopic:Communication
-  Serial.begin(9600); // Start serial communication
+  Serial.begin(4800); // Start serial communication
 
 }
 
@@ -214,6 +256,9 @@ void loop()
   Serial.print(RMC);
   makeGGA();
   Serial.print(GGA);
+
+  makeZDA();
+  Serial.print(ZDA);
 
   UpdatePosition();
 }
